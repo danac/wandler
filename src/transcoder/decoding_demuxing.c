@@ -1,75 +1,34 @@
-/*
- * Copyright (c) 2012 Stefano Sabatini
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-
-/**
- * @file
- * Demuxing and decoding example.
- *
- * Show how to use the libavformat and libavcodec API to demux and
- * decode audio and video data.
- * @example demuxing_decoding.c
- */
-
 #include <libavutil/imgutils.h>
 #include <libavutil/samplefmt.h>
 #include <libavutil/timestamp.h>
 #include <libavformat/avformat.h>
 
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55,28,1)
+#define av_frame_alloc  avcodec_alloc_frame
+#define av_frame_free  avcodec_free_frame
+#endif
+
 static AVFormatContext *fmt_ctx = NULL;
 static AVCodecContext *video_dec_ctx = NULL, *audio_dec_ctx;
-static int width, height;
-static enum AVPixelFormat pix_fmt;
+//static int width, height;
+//static enum AVPixelFormat pix_fmt;
 static AVStream *video_stream = NULL, *audio_stream = NULL;
 static const char *src_filename = NULL;
-static const char *video_dst_filename = NULL;
+//static const char *video_dst_filename = NULL;
 static const char *audio_dst_filename = NULL;
-static FILE *video_dst_file = NULL;
+//static FILE *video_dst_file = NULL;
 static FILE *audio_dst_file = NULL;
 
-static uint8_t *video_dst_data[4] = {NULL};
-static int      video_dst_linesize[4];
-static int video_dst_bufsize;
+//static uint8_t *video_dst_data[4] = {NULL};
+//static int      video_dst_linesize[4];
+//static int video_dst_bufsize;
 
-static int video_stream_idx = -1, audio_stream_idx = -1;
+//static int video_stream_idx = -1
+static int audio_stream_idx = -1;
 static AVFrame *frame = NULL;
 static AVPacket pkt;
-static int video_frame_count = 0;
+//static int video_frame_count = 0;
 static int audio_frame_count = 0;
-
-AVFrame *av_frame_alloc (void);
-void 	 av_frame_unref (AVFrame *frame);
-void 	 av_frame_free (AVFrame **frame);
-
-/* The different ways of decoding and managing data memory. You are not
- * supposed to support all the modes in your application but pick the one most
- * appropriate to your needs. Look for the use of api_mode in this example to
- * see what are the differences of API usage between them */
-enum {
-    API_MODE_OLD                  = 0, /* old method, deprecated */
-    API_MODE_NEW_API_REF_COUNT    = 1, /* new method, using the frame reference counting */
-    API_MODE_NEW_API_NO_REF_COUNT = 2, /* new method, without reference counting */
-};
-
-static int api_mode = API_MODE_OLD;
 
 static int decode_packet(int *got_frame, int cached)
 {
@@ -78,44 +37,7 @@ static int decode_packet(int *got_frame, int cached)
 
     *got_frame = 0;
 
-    if (pkt.stream_index == video_stream_idx) {
-        /* decode video frame */
-        ret = avcodec_decode_video2(video_dec_ctx, frame, got_frame, &pkt);
-        if (ret < 0) {
-            fprintf(stderr, "Error decoding video frame (%s)\n", av_err2str(ret));
-            return ret;
-        }
-        if (video_dec_ctx->width != width || video_dec_ctx->height != height ||
-            video_dec_ctx->pix_fmt != pix_fmt) {
-            /* To handle this change, one could call av_image_alloc again and
-             * decode the following frames into another rawvideo file. */
-            fprintf(stderr, "Error: Width, height and pixel format have to be "
-                    "constant in a rawvideo file, but the width, height or "
-                    "pixel format of the input video changed:\n"
-                    "old: width = %d, height = %d, format = %s\n"
-                    "new: width = %d, height = %d, format = %s\n",
-                    width, height, av_get_pix_fmt_name(pix_fmt),
-                    video_dec_ctx->width, video_dec_ctx->height,
-                    av_get_pix_fmt_name(video_dec_ctx->pix_fmt));
-            return -1;
-        }
-
-        if (*got_frame) {
-            printf("video_frame%s n:%d coded_n:%d pts:%s\n",
-                   cached ? "(cached)" : "",
-                   video_frame_count++, frame->coded_picture_number,
-                   av_ts2timestr(frame->pts, &video_dec_ctx->time_base));
-
-            /* copy decoded frame to destination buffer:
-             * this is required since rawvideo expects non aligned data */
-            av_image_copy(video_dst_data, video_dst_linesize,
-                          (const uint8_t **)(frame->data), frame->linesize,
-                          pix_fmt, width, height);
-
-            /* write to rawvideo file */
-            fwrite(video_dst_data[0], 1, video_dst_bufsize, video_dst_file);
-        }
-    } else if (pkt.stream_index == audio_stream_idx) {
+    if (pkt.stream_index == audio_stream_idx) {
         /* decode audio frame */
         ret = avcodec_decode_audio4(audio_dec_ctx, frame, got_frame, &pkt);
         if (ret < 0) {
@@ -147,11 +69,6 @@ static int decode_packet(int *got_frame, int cached)
         }
     }
 
-    /* If we use the new API with reference counting, we own the data and need
-     * to de-reference it when we don't use it anymore */
-    if (*got_frame && api_mode == API_MODE_NEW_API_REF_COUNT)
-        av_frame_unref(frame);
-
     return decoded;
 }
 
@@ -182,9 +99,6 @@ static int open_codec_context(int *stream_idx,
             return AVERROR(EINVAL);
         }
 
-        /* Init the decoders, with or without reference counting */
-        if (api_mode == API_MODE_NEW_API_REF_COUNT)
-            av_dict_set(&opts, "refcounted_frames", "1", 0);
         if ((ret = avcodec_open2(dec_ctx, dec, &opts)) < 0) {
             fprintf(stderr, "Failed to open %s codec\n",
                     av_get_media_type_string(type));
@@ -225,38 +139,24 @@ static int get_format_from_sample_fmt(const char **fmt,
     return -1;
 }
 
-int main (int argc, char **argv)
+int extract_raw_audio(const char *input_file, const char *output_file)
 {
     int ret = 0, got_frame;
 
-    if (argc != 4 && argc != 5) {
-        fprintf(stderr, "usage: %s [-refcount=<old|new_norefcount|new_refcount>] "
-                "input_file video_output_file audio_output_file\n"
-                "API example program to show how to read frames from an input file.\n"
-                "This program reads frames from a file, decodes them, and writes decoded\n"
-                "video frames to a rawvideo file named video_output_file, and decoded\n"
-                "audio frames to a rawaudio file named audio_output_file.\n\n"
-                "If the -refcount option is specified, the program use the\n"
-                "reference counting frame system which allows keeping a copy of\n"
-                "the data for longer than one decode call. If unset, it's using\n"
-                "the classic old method.\n"
-                "\n", argv[0]);
-        exit(1);
-    }
-    if (argc == 5) {
-        const char *mode = argv[1] + strlen("-refcount=");
-        if      (!strcmp(mode, "old"))            api_mode = API_MODE_OLD;
-        else if (!strcmp(mode, "new_norefcount")) api_mode = API_MODE_NEW_API_NO_REF_COUNT;
-        else if (!strcmp(mode, "new_refcount"))   api_mode = API_MODE_NEW_API_REF_COUNT;
-        else {
-            fprintf(stderr, "unknow mode '%s'\n", mode);
-            exit(1);
-        }
-        argv++;
-    }
-    src_filename = argv[1];
-    video_dst_filename = argv[2];
-    audio_dst_filename = argv[3];
+//    if (argc != 4 && argc != 5) {
+//        fprintf(stderr, "usage: %s"
+//                "input_file video_output_file audio_output_file\n"
+//                "API example program to show how to read frames from an input file.\n"
+//                "This program reads frames from a file, decodes them, and writes decoded\n"
+//                "video frames to a rawvideo file named video_output_file, and decoded\n"
+//                "audio frames to a rawaudio file named audio_output_file.\n\n"
+//                "\n", argv[0]);
+//        exit(1);
+//    }
+
+    src_filename = input_file;
+//    video_dst_filename = argv[2];
+    audio_dst_filename = output_file;
 
     /* register all formats and codecs */
     av_register_all();
@@ -273,29 +173,29 @@ int main (int argc, char **argv)
         exit(1);
     }
 
-    if (open_codec_context(&video_stream_idx, fmt_ctx, AVMEDIA_TYPE_VIDEO) >= 0) {
-        video_stream = fmt_ctx->streams[video_stream_idx];
-        video_dec_ctx = video_stream->codec;
+//    if (open_codec_context(&video_stream_idx, fmt_ctx, AVMEDIA_TYPE_VIDEO) >= 0) {
+//        video_stream = fmt_ctx->streams[video_stream_idx];
+//        video_dec_ctx = video_stream->codec;
 
-        video_dst_file = fopen(video_dst_filename, "wb");
-        if (!video_dst_file) {
-            fprintf(stderr, "Could not open destination file %s\n", video_dst_filename);
-            ret = 1;
-            goto end;
-        }
+//        video_dst_file = fopen(video_dst_filename, "wb");
+//        if (!video_dst_file) {
+//            fprintf(stderr, "Could not open destination file %s\n", video_dst_filename);
+//            ret = 1;
+//            goto end;
+//        }
 
-        /* allocate image where the decoded image will be put */
-        width = video_dec_ctx->width;
-        height = video_dec_ctx->height;
-        pix_fmt = video_dec_ctx->pix_fmt;
-        ret = av_image_alloc(video_dst_data, video_dst_linesize,
-                             width, height, pix_fmt, 1);
-        if (ret < 0) {
-            fprintf(stderr, "Could not allocate raw video buffer\n");
-            goto end;
-        }
-        video_dst_bufsize = ret;
-    }
+//        /* allocate image where the decoded image will be put */
+//        width = video_dec_ctx->width;
+//        height = video_dec_ctx->height;
+//        pix_fmt = video_dec_ctx->pix_fmt;
+//        ret = av_image_alloc(video_dst_data, video_dst_linesize,
+//                             width, height, pix_fmt, 1);
+//        if (ret < 0) {
+//            fprintf(stderr, "Could not allocate raw video buffer\n");
+//            goto end;
+//        }
+//        video_dst_bufsize = ret;
+//    }
 
     if (open_codec_context(&audio_stream_idx, fmt_ctx, AVMEDIA_TYPE_AUDIO) >= 0) {
         audio_stream = fmt_ctx->streams[audio_stream_idx];
@@ -317,12 +217,7 @@ int main (int argc, char **argv)
         goto end;
     }
 
-    /* When using the new API, you need to use the libavutil/frame.h API, while
-     * the classic frame management is available in libavcodec */
-    if (api_mode == API_MODE_OLD)
-        frame = avcodec_alloc_frame();
-    else
-        frame = av_frame_alloc();
+    frame = av_frame_alloc();
     if (!frame) {
         fprintf(stderr, "Could not allocate frame\n");
         ret = AVERROR(ENOMEM);
@@ -334,8 +229,8 @@ int main (int argc, char **argv)
     pkt.data = NULL;
     pkt.size = 0;
 
-    if (video_stream)
-        printf("Demuxing video from file '%s' into '%s'\n", src_filename, video_dst_filename);
+//    if (video_stream)
+//        printf("Demuxing video from file '%s' into '%s'\n", src_filename, video_dst_filename);
     if (audio_stream)
         printf("Demuxing audio from file '%s' into '%s'\n", src_filename, audio_dst_filename);
 
@@ -361,12 +256,12 @@ int main (int argc, char **argv)
 
     printf("Demuxing succeeded.\n");
 
-    if (video_stream) {
-        printf("Play the output video file with the command:\n"
-               "ffplay -f rawvideo -pix_fmt %s -video_size %dx%d %s\n",
-               av_get_pix_fmt_name(pix_fmt), width, height,
-               video_dst_filename);
-    }
+//    if (video_stream) {
+//        printf("Play the output video file with the command:\n"
+//               "ffplay -f rawvideo -pix_fmt %s -video_size %dx%d %s\n",
+//               av_get_pix_fmt_name(pix_fmt), width, height,
+//               video_dst_filename);
+//    }
 
     if (audio_stream) {
         enum AVSampleFormat sfmt = audio_dec_ctx->sample_fmt;
@@ -395,15 +290,12 @@ end:
     avcodec_close(video_dec_ctx);
     avcodec_close(audio_dec_ctx);
     avformat_close_input(&fmt_ctx);
-    if (video_dst_file)
-        fclose(video_dst_file);
+//    if (video_dst_file)
+//        fclose(video_dst_file);
     if (audio_dst_file)
         fclose(audio_dst_file);
-    if (api_mode == API_MODE_OLD)
-        avcodec_free_frame(&frame);
-    else
-        av_frame_free(&frame);
-    av_free(video_dst_data[0]);
+    av_frame_free(&frame);
+//    av_free(video_dst_data[0]);
 
     return ret < 0;
 }

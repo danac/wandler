@@ -1,15 +1,15 @@
 #ifndef JOBLIST_H
 #define JOBLIST_H
 
-#include <string>
-
 #include <QObject>
-#include <QQueue>
-#include <QMutex>
-#include <QWaitCondition>
-#include <QReadWriteLock>
 
 #include "job.h"
+
+class WorkerPool;
+template<typename> class QQueue;
+class QMutex;
+class QReadWriteLock;
+class QWaitCondition;
 
 class JobDispatcher : public QObject
 {
@@ -19,16 +19,18 @@ public:
     explicit JobDispatcher(QObject* parent = 0);
     Job popJob();
     void pushJob(const Job& job);
-    void waitForJobs(QMutex &mutex);
     bool active();
-    void active(bool flag);
+    void shutdown();
+    void start();
 
 private:
-    QQueue<Job> m_queue;
-    QMutex m_mutex;
-    QReadWriteLock m_readWriteLock;
-    QWaitCondition m_waitCondition;
+    typedef QQueue<Job> JobQueue;
+    JobQueue* m_queue;
+    WorkerPool* m_workerPool;
     bool m_active;
+    QMutex* m_mutex;
+    QReadWriteLock* m_readWriteLock;
+    QWaitCondition* m_waitCondition;
 };
 
 #endif // JOBLIST_H

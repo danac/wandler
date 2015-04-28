@@ -2,7 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QThread>
+
+class JobDispatcher;
 
 namespace Ui {
 class MainWindow;
@@ -25,6 +26,7 @@ private slots:
 
 private:
     Ui::MainWindow* m_ui;
+    JobDispatcher* m_jobDispatcher;
 };
 
 #endif // MAINWINDOW_H

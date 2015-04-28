@@ -13,4 +13,9 @@ private:
     std::string m_path;
 };
 
+class EndOfJobs : public Job
+{
+
+};
+
 #endif // JOB_H

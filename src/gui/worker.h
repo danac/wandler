@@ -4,7 +4,8 @@
 #include <QObject>
 
 #include "job.h"
-#include "jobdispatcher.h"
+
+class JobDispatcher;
 
 class Worker : public QObject
 {
@@ -12,19 +13,17 @@ class Worker : public QObject
 public:
     explicit Worker(JobDispatcher* dispatcher, QObject* parent = 0);
 
-signals:
-    void finished();
-    void error(QString err);
-
 public slots:
     void work();
+
+//signals:
+//    void finished();
 
 private:
     void process(const Job& job);
 
 private:
     JobDispatcher* m_dispatcher;
-
 };
 
 #endif // WORKER_H

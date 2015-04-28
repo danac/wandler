@@ -2,12 +2,14 @@
 #define WORKERPOOL_H
 
 #include <QObject>
-#include <QList>
-#include <QThread>
 
-#include "jobdispatcher.h"
 #include "worker.h"
 
+class QThread;
+class Worker;
+template<typename> class QList;
+
+class JobDispatcher;
 
 class WorkerPool : public QObject
 {
@@ -15,13 +17,14 @@ class WorkerPool : public QObject
 
 public:
     explicit WorkerPool(JobDispatcher* dispatcher, int num_workers = 1, QObject* parent = 0);
+    ~WorkerPool();
     void start();
 
 private:
     typedef QList<QThread*> ThreadList;
     typedef QList<Worker*> WorkerList;
-    WorkerList m_workers;
-    ThreadList m_threads;
+    WorkerList* m_workers;
+    ThreadList* m_threads;
 };
 
 #endif // WORKERPOOL_H

@@ -3,11 +3,15 @@
 
 #include <QMutexLocker>
 #include <QThread>
+#include <QString>
+#include <QFileInfo>
+#include <QDir>
 
 #include "worker.h"
 #include "exceptions.h"
 #include "jobdispatcher.h"
 #include "job.h"
+#include "settings.h"
 
 #define STR(x) #x
 #define STRINGIFY(x) STR(x)
@@ -21,6 +25,13 @@ Worker::Worker(JobDispatcher* dispatcher, QObject* parent) :
 
 void Worker::process(const Job& job)
 {
+    QString path = job.getPath();
+    QFileInfo fileInfo(path);
+    QString baseName = fileInfo.baseName();
+    QString outputFolder = Settings::outputFolder;
+    QString destinationPath = QDir::cleanPath(outputFolder + QDir::separator() + baseName);
+    qDebug(destinationPath.toStdString().c_str());
+
 //    qDebug(FFMPEG_EXE_STR);
     sleep(1);
 }

@@ -9,6 +9,7 @@
 #include "ui_mainwindow.h"
 #include "jobdispatcher.h"
 #include "job.h"
+#include "settings.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -20,6 +21,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_jobDispatcher, SIGNAL(jobsFinished()), this, SLOT(handleJobsFinished()));
     connect(m_jobDispatcher, SIGNAL(jobCompleted(Job)), this, SLOT(handleJobCompleted(Job)));
     initUi();
+    setDefaultSettings();
+}
+
+void MainWindow::setDefaultSettings()
+{
+    Settings::outputFolder = m_ui->lineEditOutputFolder->text();
 }
 
 void MainWindow::initUi()

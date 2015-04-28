@@ -36,6 +36,7 @@ private:
     QStringList browseFiles();
     QString browseFolder();
     void initUi();
+    void setDefaultSettings();
 
 private:
     Ui::MainWindow* m_ui;

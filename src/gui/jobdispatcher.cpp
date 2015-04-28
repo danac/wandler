@@ -3,6 +3,7 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include <QReadWriteLock>
+#include <QMetaType>
 
 #include "jobdispatcher.h"
 #include "exceptions.h"
@@ -17,6 +18,12 @@ JobDispatcher::JobDispatcher(QObject* parent) :
     m_readWriteLock(new QReadWriteLock),
     m_waitCondition(new QWaitCondition)
 {
+    qRegisterMetaType<Job>();
+}
+
+void JobDispatcher::handleJobCompleted(Job job)
+{
+    emit jobCompleted(job);
 }
 
 Job JobDispatcher::popJob()
@@ -24,14 +31,16 @@ Job JobDispatcher::popJob()
     QMutexLocker lock(m_mutex);
     if(m_queue->empty())
     {
-        emit jobsCompleted();
+        emit jobsFinished();
         m_waitCondition->wait(m_mutex);
     }
     if(!active())
     {
         throw Exceptions::EndOfWork();
     }
-    return m_queue->dequeue();
+    Job job = m_queue->dequeue();
+    emit jobInProgress(job);
+    return job;
 }
 
 void JobDispatcher::pushJob(const Job& job)

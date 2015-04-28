@@ -15,8 +15,8 @@ public:
 public slots:
     void work();
 
-//signals:
-//    void finished();
+signals:
+    void jobCompleted(Job job);
 
 private:
     void process(const Job& job);

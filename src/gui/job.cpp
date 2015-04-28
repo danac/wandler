@@ -1,11 +1,16 @@
 #include "job.h"
 
-Job::Job(const std::string& path)
+Job::Job(const QString& path)
     :m_path(path)
 {
 }
 
-std::string Job::getPath() const
+Job::Job()
+    :m_path("")
+{
+}
+
+QString Job::getPath() const
 {
     return m_path;
 }

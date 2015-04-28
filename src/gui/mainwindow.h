@@ -6,6 +6,7 @@
 class JobDispatcher;
 class QStringList;
 class QString;
+class Job;
 
 namespace Ui {
 class MainWindow;
@@ -21,9 +22,11 @@ public:
 
 private slots:
     void startWork();
-    void handleJobsCompleted();
+    void handleJobCompleted(Job job);
+    void handleJobsFinished();
     void addFiles();
     void addFolder();
+    void clearSelectedPending();
 
     // Menubar entries
     void on_actionExit_triggered();
@@ -32,7 +35,7 @@ private slots:
 private:
     QStringList browseFiles();
     QString browseFolder();
-    void connectUiSignals();
+    void initUi();
 
 private:
     Ui::MainWindow* m_ui;

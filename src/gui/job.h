@@ -1,21 +1,20 @@
 #ifndef JOB_H
 #define JOB_H
 
-#include <string>
+#include <QString>
+#include <QMetaType>
 
 class Job
 {
 public:
-    Job(const std::string& path);
-    std::string getPath() const;
+    Job();
+    Job(const QString& path);
+    QString getPath() const;
 
 private:
-    std::string m_path;
+    QString m_path;
 };
 
-class EndOfJobs : public Job
-{
-
-};
+Q_DECLARE_METATYPE(Job)
 
 #endif // JOB_H

@@ -23,8 +23,13 @@ public:
     void shutdown();
     void start();
 
+public slots:
+    void handleJobCompleted(Job job);
+
 signals:
-    void jobsCompleted();
+    void jobInProgress(Job job);
+    void jobCompleted(Job job);
+    void jobsFinished();
 
 private:
     typedef QQueue<Job> JobQueue;

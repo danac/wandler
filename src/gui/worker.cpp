@@ -23,18 +23,16 @@ void Worker::process(const Job& job)
 {
 //    qDebug(FFMPEG_EXE_STR);
     sleep(1);
-    qDebug(job.getPath().c_str());
 }
 
 void Worker::work()
 {
-    qDebug("Start");
-
     forever {
         try
         {
             Job job = m_dispatcher->popJob();
             process(job);
+            emit jobCompleted(job);
         }
         catch(std::exception& error)
         {

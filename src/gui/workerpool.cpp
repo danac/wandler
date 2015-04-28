@@ -2,6 +2,7 @@
 #include <QList>
 
 #include "workerpool.h"
+#include "jobdispatcher.h"
 
 WorkerPool::WorkerPool(JobDispatcher* dispatcher, int num_workers, QObject* parent) :
     QObject(parent), m_workers(new WorkerList), m_threads(new ThreadList)
@@ -14,6 +15,7 @@ WorkerPool::WorkerPool(JobDispatcher* dispatcher, int num_workers, QObject* pare
 
 //        connect(worker, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
         connect(thread, SIGNAL(started()), worker, SLOT(work()));
+        connect(worker, SIGNAL(jobCompleted(Job)), dispatcher, SLOT(handleJobCompleted(Job)));
 
         m_workers->append(worker);
         m_threads->append(thread);

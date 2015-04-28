@@ -1,6 +1,9 @@
+#include <cassert>
+
 #include <QMessageBox>
 #include <QStringList>
 #include <QFileDialog>
+#include <QString>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -14,15 +17,18 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->setupUi(this);
     m_jobDispatcher = new JobDispatcher(this);
     m_jobDispatcher->start();
-    connect(m_jobDispatcher, SIGNAL(jobsCompleted()), this, SLOT(handleJobsCompleted()));
-    connectUiSignals();
+    connect(m_jobDispatcher, SIGNAL(jobsFinished()), this, SLOT(handleJobsFinished()));
+    connect(m_jobDispatcher, SIGNAL(jobCompleted(Job)), this, SLOT(handleJobCompleted(Job)));
+    initUi();
 }
 
-void MainWindow::connectUiSignals()
+void MainWindow::initUi()
 {
+    m_ui->lineEditOutputFolder->setText(QDir::home().absolutePath());
     connect(m_ui->pushButtonStart, SIGNAL(clicked()), this, SLOT(startWork()));
     connect(m_ui->pushButtonAddFiles, SIGNAL(clicked()), this, SLOT(addFiles()));
     connect(m_ui->pushButtonAddFolder, SIGNAL(clicked()), this, SLOT(addFolder()));
+    connect(m_ui->pushButtonClearPending, SIGNAL(clicked()), this, SLOT(clearSelectedPending()));
 }
 
 MainWindow::~MainWindow()
@@ -34,6 +40,25 @@ MainWindow::~MainWindow()
 void MainWindow::addFiles()
 {
     QStringList files = browseFiles();
+    QStringList::const_iterator i;
+    for(i = files.begin(); i != files.end(); ++i)
+    {
+        QString path = *i;
+        QListWidget* listWidget = m_ui->listWidgetPending;
+        new QListWidgetItem(path, listWidget);
+    }
+}
+
+void MainWindow::clearSelectedPending()
+{
+    QListWidget* listWidget = m_ui->listWidgetPending;
+    QList<QListWidgetItem*> selection = listWidget->selectedItems();
+    QList<QListWidgetItem*>::iterator i;
+    for(i = selection.begin(); i != selection.end(); ++i)
+    {
+        listWidget->takeItem(listWidget->row(*i));
+    }
+
 }
 
 void MainWindow::addFolder()
@@ -43,17 +68,35 @@ void MainWindow::addFolder()
 
 void MainWindow::startWork()
 {
+    QListWidget* listWidget = m_ui->listWidgetPending;
+    for(int i(0); i < listWidget->count(); ++i)
+    {
+        QListWidgetItem* item = listWidget->item(i);
+        QString path = item->text();
 
-    Job job1("Job 1");
-    Job job2("Job 2");
-    Job job3("Job 3");
-
-    m_jobDispatcher->pushJob(job1);
-
-    qDebug("mainStart");
+        Job job(path);
+        m_jobDispatcher->pushJob(job);
+    }
 }
 
-void MainWindow::handleJobsCompleted()
+void MainWindow::handleJobCompleted(Job job)
+{
+    qDebug("Completed: ");
+    qDebug(job.getPath().toStdString().c_str());
+
+    QString path = job.getPath();
+
+    QListWidget* listWidgetPending = m_ui->listWidgetPending;
+    QListWidget* listWidgetCompleted = m_ui->listWidgetCompleted;
+
+    QList<QListWidgetItem*> itemFound = listWidgetPending->findItems(path, Qt::MatchExactly);
+    assert(itemFound.size() == 1);
+
+    listWidgetPending->takeItem(listWidgetPending->row(itemFound[0]));
+    new QListWidgetItem(path, listWidgetCompleted);
+}
+
+void MainWindow::handleJobsFinished()
 {
     m_ui->tabWidgetSource->setEnabled(true);
     m_ui->pushButtonStart->setEnabled(true);

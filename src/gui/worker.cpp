@@ -7,6 +7,7 @@
 #include "worker.h"
 #include "exceptions.h"
 #include "jobdispatcher.h"
+#include "job.h"
 
 #define STR(x) #x
 #define STRINGIFY(x) STR(x)

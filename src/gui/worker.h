@@ -3,8 +3,7 @@
 
 #include <QObject>
 
-#include "job.h"
-
+class Job;
 class JobDispatcher;
 
 class Worker : public QObject

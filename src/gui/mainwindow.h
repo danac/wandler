@@ -4,6 +4,8 @@
 #include <QMainWindow>
 
 class JobDispatcher;
+class QStringList;
+class QString;
 
 namespace Ui {
 class MainWindow;
@@ -19,10 +21,18 @@ public:
 
 private slots:
     void startWork();
+    void handleJobsCompleted();
+    void addFiles();
+    void addFolder();
 
     // Menubar entries
     void on_actionExit_triggered();
     void on_actionAbout_triggered();
+
+private:
+    QStringList browseFiles();
+    QString browseFolder();
+    void connectUiSignals();
 
 private:
     Ui::MainWindow* m_ui;

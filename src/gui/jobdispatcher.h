@@ -23,6 +23,9 @@ public:
     void shutdown();
     void start();
 
+signals:
+    void jobsCompleted();
+
 private:
     typedef QQueue<Job> JobQueue;
     JobQueue* m_queue;

@@ -24,6 +24,7 @@ Job JobDispatcher::popJob()
     QMutexLocker lock(m_mutex);
     if(m_queue->empty())
     {
+        emit jobsCompleted();
         m_waitCondition->wait(m_mutex);
     }
     if(!active())

@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -24,15 +27,15 @@
        <string>Output folder</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="0">
-        <widget class="QLineEdit" name="lineEditOutputFolder"/>
-       </item>
        <item row="0" column="1">
         <widget class="QPushButton" name="pushButtonBrowseOutputFolder">
          <property name="text">
           <string>Browse</string>
          </property>
         </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLineEdit" name="lineEditOutputFolder"/>
        </item>
       </layout>
      </widget>
@@ -41,6 +44,12 @@
      <widget class="QTabWidget" name="tabWidgetSource">
       <property name="enabled">
        <bool>true</bool>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
       <property name="maximumSize">
        <size>
@@ -59,70 +68,79 @@
         </size>
        </property>
        <attribute name="title">
-        <string>Add files and folders</string>
+        <string>Add files</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_3">
         <item row="0" column="0">
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Enter a file or folder path:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
-           <widget class="QLineEdit" name="lineEditAddFilesFolders"/>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButtonBrowseFilesFolders">
+           <widget class="QPushButton" name="pushButtonAddFiles">
             <property name="text">
-             <string>Browse</string>
+             <string>Add files</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButtonSubmitFilesFolders">
+           <widget class="QPushButton" name="pushButtonAddFolder">
             <property name="text">
-             <string>OK</string>
+             <string>Add a folder</string>
             </property>
            </widget>
           </item>
          </layout>
         </item>
+        <item row="0" column="1">
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="tabYouTube">
        <attribute name="title">
-        <string>Add YouTube video</string>
+        <string>Add a YouTube video</string>
        </attribute>
+       <layout class="QGridLayout" name="gridLayout_5">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_2">
+          <property name="font">
+           <font>
+            <italic>true</italic>
+           </font>
+          </property>
+          <property name="text">
+           <string>Coming soon...</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
     <item row="2" column="0" colspan="2">
-     <widget class="QTabWidget" name="tabWidgetLogs">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <widget class="QWidget" name="tab">
-       <attribute name="title">
-        <string>Pending tasks</string>
-       </attribute>
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0">
-         <widget class="QListWidget" name="listWidgetTasksPending"/>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tab_2">
-       <attribute name="title">
-        <string>Completed tasks</string>
-       </attribute>
-      </widget>
-     </widget>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="1">
+       <widget class="QListWidget" name="listWidgetInProgress">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QListWidget" name="listWidgetPending"/>
+      </item>
+      <item row="0" column="2">
+       <widget class="QListWidget" name="listWidgetCompleted"/>
+      </item>
+     </layout>
     </item>
     <item row="3" column="0">
      <spacer name="horizontalSpacer">

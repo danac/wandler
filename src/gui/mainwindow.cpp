@@ -76,31 +76,39 @@ void MainWindow::addFolder()
 void MainWindow::startWork()
 {
     QListWidget* listWidget = m_ui->listWidgetPending;
-    for(int i(0); i < listWidget->count(); ++i)
+    if(listWidget->count() == 0)
     {
-        QListWidgetItem* item = listWidget->item(i);
-        QString path = item->text();
+        handleJobsFinished();
+    }
+    else
+    {
+        for(int i(0); i < listWidget->count(); ++i)
+        {
+            QListWidgetItem* item = listWidget->item(i);
+            QString path = item->text();
 
-        Job job(path);
-        m_jobDispatcher->pushJob(job);
+            Job job(path);
+            m_jobDispatcher->pushJob(job);
+        }
     }
 }
 
 void MainWindow::handleJobCompleted(Job job)
 {
     qDebug("Completed: ");
-    qDebug(job.getPath().toStdString().c_str());
+    qDebug(job.getDestinationPath().toStdString().c_str());
 
-    QString path = job.getPath();
+    QString sourcePath = job.getSourcePath();
+    QString destinationPath = job.getDestinationPath();
 
     QListWidget* listWidgetPending = m_ui->listWidgetPending;
     QListWidget* listWidgetCompleted = m_ui->listWidgetCompleted;
 
-    QList<QListWidgetItem*> itemFound = listWidgetPending->findItems(path, Qt::MatchExactly);
+    QList<QListWidgetItem*> itemFound = listWidgetPending->findItems(sourcePath, Qt::MatchExactly);
     assert(itemFound.size() == 1);
 
     listWidgetPending->takeItem(listWidgetPending->row(itemFound[0]));
-    new QListWidgetItem(path, listWidgetCompleted);
+    new QListWidgetItem(destinationPath, listWidgetCompleted);
 }
 
 void MainWindow::handleJobsFinished()

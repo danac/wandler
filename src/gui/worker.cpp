@@ -23,9 +23,9 @@ Worker::Worker(JobDispatcher* dispatcher, QObject* parent) :
 {
 }
 
-void Worker::process(const Job& job)
+Job Worker::process(const Job& job)
 {
-    QString path = job.getPath();
+    QString path = job.getSourcePath();
     QFileInfo fileInfo(path);
     QString baseName = fileInfo.baseName();
     QString outputFolder = Settings::outputFolder;
@@ -34,6 +34,7 @@ void Worker::process(const Job& job)
 
 //    qDebug(FFMPEG_EXE_STR);
     sleep(1);
+    return job;
 }
 
 void Worker::work()
@@ -42,8 +43,8 @@ void Worker::work()
         try
         {
             Job job = m_dispatcher->popJob();
-            process(job);
-            emit jobCompleted(job);
+            Job result = process(job);
+            emit jobCompleted(result);
         }
         catch(std::exception& error)
         {

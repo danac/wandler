@@ -24,7 +24,7 @@ public:
     void start();
 
 public slots:
-    void handleJobCompleted(Job job);
+    void handleJobCompleted(Job result);
 
 signals:
     void jobInProgress(Job job);

@@ -19,7 +19,7 @@ signals:
     void jobCompleted(Job job);
 
 private:
-    void process(const Job& job);
+    Job process(const Job& job);
 
 private:
     JobDispatcher* m_dispatcher;

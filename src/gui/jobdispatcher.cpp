@@ -21,9 +21,9 @@ JobDispatcher::JobDispatcher(QObject* parent) :
     qRegisterMetaType<Job>();
 }
 
-void JobDispatcher::handleJobCompleted(Job job)
+void JobDispatcher::handleJobCompleted(Job result)
 {
-    emit jobCompleted(job);
+    emit jobCompleted(result);
 }
 
 Job JobDispatcher::popJob()

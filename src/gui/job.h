@@ -8,11 +8,13 @@ class Job
 {
 public:
     Job();
-    Job(const QString& path);
-    QString getPath() const;
+    Job(const QString& source, const QString& destination="");
+    QString getSourcePath() const;
+    QString getDestinationPath() const;
 
 private:
-    QString m_path;
+    QString m_source;
+    QString m_destination;
 };
 
 Q_DECLARE_METATYPE(Job)

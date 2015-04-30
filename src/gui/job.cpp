@@ -1,16 +1,21 @@
 #include "job.h"
 
-Job::Job(const QString& path)
-    :m_path(path)
+Job::Job(const QString& sourcePath, const QString& destinationPath)
+    :m_source(sourcePath), m_destination(destinationPath)
 {
 }
 
 Job::Job()
-    :m_path("")
+    :m_source(""), m_destination("")
 {
 }
 
-QString Job::getPath() const
+QString Job::getSourcePath() const
 {
-    return m_path;
+    return m_source;
+}
+
+QString Job::getDestinationPath() const
+{
+    return m_destination;
 }

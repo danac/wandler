@@ -7,6 +7,7 @@
 #include <QStringList>
 #include <QFileInfo>
 #include <QDir>
+#include <QProcess>
 
 #include "worker.h"
 #include "exceptions.h"
@@ -41,9 +42,13 @@ Job Worker::process(const Job& job)
     QString destinationPath = QDir::cleanPath(outputFolder + QDir::separator() + destinationFileName);
 
     QStringList ffmpegArgs;
-    ffmpegArgs << "-i" << sourcePath << "-q 0" << destinationPath;
-//    qDebug(FFMPEG_EXE_STR);
-    sleep(1);
+    QString ffmpegExe = FFMPEG_EXE_STR;
+    ffmpegArgs << "-y" << "-i" << sourcePath << "-q" << "0" << destinationPath;
+
+    QProcess process;
+    process.start(ffmpegExe, ffmpegArgs);
+    process.waitForFinished();
+    QString output = process.readAllStandardOutput();
 
     Job result(sourcePath, destinationPath);
     return result;

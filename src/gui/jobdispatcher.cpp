@@ -9,10 +9,10 @@
 #include "exceptions.h"
 #include "workerpool.h"
 
-JobDispatcher::JobDispatcher(QObject* parent) :
+JobDispatcher::JobDispatcher(int num_workers, QObject* parent) :
     QObject(parent),
     m_queue(new JobQueue),
-    m_workerPool(new WorkerPool(this, 1, this)),
+    m_workerPool(new WorkerPool(this, num_workers, this)),
     m_active(true),
     m_mutex(new QMutex),
     m_readWriteLock(new QReadWriteLock),

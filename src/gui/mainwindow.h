@@ -21,12 +21,16 @@ public:
     ~MainWindow();
 
 private slots:
-    void startWork();
+    void handleStart();
     void handleJobCompleted(Job job);
     void handleJobsFinished();
-    void addFiles();
-    void addFolder();
-    void clearSelectedPending();
+    void handleJobInProgress(Job job);
+    void handleToggleCustomOutputFolder(bool useCustomOutputFolder);
+    void handleUpdateCustomOutputFolder();
+    void handleAddFiles();
+    void handleAddFolder();
+    void handleBrowseCustomOutputFolder();
+    void handleClearSelectedPending();
 
     // Menubar entries
     void on_actionExit_triggered();
@@ -36,7 +40,7 @@ private:
     QStringList browseFiles();
     QString browseFolder();
     void initUi();
-    void setDefaultSettings();
+    void readUiSettings();
 
 private:
     Ui::MainWindow* m_ui;

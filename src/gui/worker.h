@@ -17,6 +17,7 @@ public slots:
 
 signals:
     void jobCompleted(Job job);
+    void jobInProgress(Job job);
 
 private:
     Job process(const Job& job);

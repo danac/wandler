@@ -4,6 +4,7 @@
 #include <QMutexLocker>
 #include <QThread>
 #include <QString>
+#include <QStringList>
 #include <QFileInfo>
 #include <QDir>
 
@@ -25,16 +26,27 @@ Worker::Worker(JobDispatcher* dispatcher, QObject* parent) :
 
 Job Worker::process(const Job& job)
 {
-    QString path = job.getSourcePath();
-    QFileInfo fileInfo(path);
-    QString baseName = fileInfo.baseName();
-    QString outputFolder = Settings::outputFolder;
-    QString destinationPath = QDir::cleanPath(outputFolder + QDir::separator() + baseName);
-    qDebug(destinationPath.toStdString().c_str());
+    QString sourcePath = job.getSourcePath();
+    QFileInfo fileInfo(sourcePath);
+    QString destinationFileName = fileInfo.baseName() + ".mp3";
+    QString outputFolder("");
+    if(Settings::useCustomOutputFolder)
+    {
+        outputFolder = Settings::customOutputFolder;
+    }
+    else
+    {
+        outputFolder = fileInfo.dir().absolutePath();
+    }
+    QString destinationPath = QDir::cleanPath(outputFolder + QDir::separator() + destinationFileName);
 
+    QStringList ffmpegArgs;
+    ffmpegArgs << "-i" << sourcePath << "-q 0" << destinationPath;
 //    qDebug(FFMPEG_EXE_STR);
     sleep(1);
-    return job;
+
+    Job result(sourcePath, destinationPath);
+    return result;
 }
 
 void Worker::work()
@@ -43,6 +55,8 @@ void Worker::work()
         try
         {
             Job job = m_dispatcher->popJob();
+            emit jobInProgress(job);
+
             Job result = process(job);
             emit jobCompleted(result);
         }

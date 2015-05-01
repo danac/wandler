@@ -6,7 +6,9 @@
 class Settings
 {
 public:
-    static QString outputFolder;
+    static bool useCustomOutputFolder;
+    static QString customOutputFolder;
+    static QString defaultCustomOutputFolder;
 };
 
 #endif // SETTINGS_H

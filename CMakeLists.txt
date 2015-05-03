@@ -21,8 +21,6 @@ else(FFMPEG_EXE)
     message(STATUS "Could not find FFmpeg. Using shipped version!")
 endif(FFMPEG_EXE)
 
-add_definitions(-DFFMPEG_EXE=../contrib/ffmpeg)
-
 set(CMAKE_AUTOMOC ON)
 
 add_subdirectory(src)

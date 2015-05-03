@@ -13,13 +13,15 @@ else(WIN32)
     set(FFMPEG_EXE_NAME ffmpeg)
 endif(WIN32)
 
-find_program (FFMPEG_EXE ${FFMPEG_EXE_NAME} HINTS "${CMAKE_SOURCE_DIR}/contrib" REQUIRED)
-if(NOT FFMPEG_EXE EQUAL FFMPEG-NOTFOUND)
+find_program (FFMPEG_EXE ${FFMPEG_EXE_NAME})
+if(FFMPEG_EXE)
     message(STATUS "Found FFmpeg: ${FFMPEG_EXE}")
     add_definitions(-DFFMPEG_EXE=${FFMPEG_EXE})
-else(NOT FFMPEG_EXE EQUAL FFMPEG-NOTFOUND)
-    message(FATAL_ERROR "Could not find FFmpeg!")
-endif(NOT FFMPEG_EXE EQUAL FFMPEG-NOTFOUND)
+else(FFMPEG_EXE)
+    message(STATUS "Could not find FFmpeg. Using shipped version!")
+endif(FFMPEG_EXE)
+
+add_definitions(-DFFMPEG_EXE=../contrib/ffmpeg)
 
 set(CMAKE_AUTOMOC ON)
 

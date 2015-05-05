@@ -21,6 +21,15 @@ JobDispatcher::JobDispatcher(int num_workers, QObject* parent) :
     qRegisterMetaType<Job>();
 }
 
+JobDispatcher::~JobDispatcher()
+{
+	delete m_waitCondition;
+	delete m_readWriteLock;
+	delete m_mutex;
+	delete m_workerPool;
+	delete m_queue;
+}
+
 void JobDispatcher::handleJobCompleted(Job result)
 {
     emit jobCompleted(result);

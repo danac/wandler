@@ -17,7 +17,7 @@ class WorkerPool : public QObject
 
 public:
     explicit WorkerPool(JobDispatcher* dispatcher, int num_workers = 1, QObject* parent = 0);
-    ~WorkerPool();
+    virtual ~WorkerPool();
     void start();
 
 private:

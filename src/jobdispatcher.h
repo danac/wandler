@@ -17,6 +17,7 @@ class JobDispatcher : public QObject
 
 public:
     explicit JobDispatcher(int num_workers = 1, QObject* parent = 0);
+	virtual ~JobDispatcher();
     Job popJob();
     void pushJob(const Job& job);
     bool active();

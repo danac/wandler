@@ -70,6 +70,7 @@ void MainWindow::handleUpdateCustomOutputFolder()
 MainWindow::~MainWindow()
 {
     m_jobDispatcher->shutdown();
+	delete m_jobDispatcher;
     delete m_ui;
 }
 

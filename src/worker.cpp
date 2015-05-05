@@ -1,6 +1,4 @@
 #include <exception>
-#include <unistd.h>
-
 #include <QMutexLocker>
 #include <QThread>
 #include <QString>
@@ -8,6 +6,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QProcess>
+#include <QCoreApplication>
 
 #include "worker.h"
 #include "exceptions.h"
@@ -17,7 +16,6 @@
 
 #define STR(x) #x
 #define STRINGIFY(x) STR(x)
-
 #define FFMPEG_EXE_STR STRINGIFY(FFMPEG_EXE)
 
 Worker::Worker(JobDispatcher* dispatcher, QObject* parent) :
@@ -42,11 +40,23 @@ Job Worker::process(const Job& job)
     QString destinationPath = QDir::cleanPath(outputFolder + QDir::separator() + destinationFileName);
 
     QStringList ffmpegArgs;
-    QString ffmpegExe = FFMPEG_EXE_STR;
     ffmpegArgs << "-y" << "-i" << sourcePath << "-q" << "0" << destinationPath;
 
+    QString ffmpegExeStr = FFMPEG_EXE_STR;
+	QDir ffmpegExeDir(ffmpegExeStr);
+	QString ffmpegExePath = "";
+
+	if(ffmpegExeDir.isAbsolute())
+	{
+		ffmpegExePath = ffmpegExeStr;
+	}
+	else
+	{
+		QString rootPath = QCoreApplication::applicationDirPath();
+		ffmpegExePath = QDir::cleanPath(rootPath + QDir::separator() + ffmpegExeStr);
+	}
     QProcess process;
-    process.start(ffmpegExe, ffmpegArgs);
+    process.start(ffmpegExePath, ffmpegArgs);
     process.waitForFinished();
     QString output = process.readAllStandardOutput();
 
@@ -73,7 +83,6 @@ void Worker::work()
             }
         }
     }
-    qDebug("finished");
     this->thread()->quit();
 }
 

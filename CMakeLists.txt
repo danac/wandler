@@ -19,6 +19,7 @@ if(FFMPEG_EXE)
     add_definitions(-DFFMPEG_EXE=${FFMPEG_EXE})
 else(FFMPEG_EXE)
     message(STATUS "Could not find FFmpeg. Using shipped version!")
+    add_definitions(-DFFMPEG_EXE=../contrib/${FFMPEG_EXE_NAME})
 endif(FFMPEG_EXE)
 
 set(CMAKE_AUTOMOC ON)

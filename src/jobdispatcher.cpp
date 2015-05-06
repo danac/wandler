@@ -23,11 +23,11 @@ JobDispatcher::JobDispatcher(int num_workers, QObject* parent) :
 
 JobDispatcher::~JobDispatcher()
 {
+	delete m_workerPool;
+	delete m_queue;
 	delete m_waitCondition;
 	delete m_readWriteLock;
 	delete m_mutex;
-	delete m_workerPool;
-	delete m_queue;
 }
 
 void JobDispatcher::handleJobCompleted(Job result)
